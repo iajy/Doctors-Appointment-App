@@ -51,19 +51,13 @@ const Login = () => {
               <p className="text-center text-sm mt-4">
                 Don’t have an account?{" "}
                 <span
-                  //   onClick={signOverlay}
                   className="text-indigo-600 hover:underline cursor-pointer"
                 >
                   Sign up
                 </span>
               </p>
             </form>
-            <button
-              //   onClick={closeLogin}
-              className="absolute top-3 right-4 text-xl font-bold text-gray-500 hover:text-red-500 transition"
-            >
-              &times;
-            </button>
+           
           </div>
         </div>
       )}

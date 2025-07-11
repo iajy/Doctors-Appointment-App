@@ -1,17 +1,16 @@
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const localizer = momentLocalizer(moment);
 
 function MyBigCalendar() {
-
   const [events, setEvents] = useState([
     {
       title: "Arun K in 9:00AM",
-      start: new Date(2025,6,20,9),
-      end: new Date(2025,6,20,10),
+      start: new Date(2025, 6, 20, 9),
+      end: new Date(2025, 6, 20, 10),
     },
   ]);
 
@@ -19,7 +18,6 @@ function MyBigCalendar() {
   const [date, setDate] = useState(null);
   const [inputAp, setInputAp] = useState(false);
 
-  
   const [doctor, setDoctor] = useState("");
   const [patient, setPatient] = useState("");
   const [time, setTime] = useState("");
@@ -30,7 +28,6 @@ function MyBigCalendar() {
       return;
     }
 
-    
     const [hours, minutes] = time.split(":");
     const startDate = new Date(date);
     startDate.setHours(Number(hours));
@@ -47,7 +44,6 @@ function MyBigCalendar() {
 
     setEvents([...events, newEvent]);
 
-    
     setDoctor("");
     setPatient("");
     setTime("");
@@ -55,12 +51,23 @@ function MyBigCalendar() {
     setAppointment(false);
   };
 
+  useEffect(() => {
+    localStorage.setItem("events", JSON.stringify(events));
+  }, [events]);
+
+  useEffect(() => {
+    const storedEvents = localStorage.getItem("events");
+    if (storedEvents) {
+      setEvents(JSON.parse(storedEvents));
+    }
+  }, []);
+
   return (
     <>
       <Calendar
         className="p-2 m-4"
         localizer={localizer}
-        events={events} 
+        events={events}
         startAccessor="start"
         endAccessor="end"
         selectable
@@ -109,7 +116,9 @@ function MyBigCalendar() {
                 </div>
 
                 <div>
-                  <label className="block mb-1 font-medium">Patient Name:</label>
+                  <label className="block mb-1 font-medium">
+                    Patient Name:
+                  </label>
                   <select
                     className="w-full border rounded p-2"
                     value={patient}
@@ -145,6 +154,7 @@ function MyBigCalendar() {
                 >
                   Save
                 </button>
+                {/* {localStorage.getItem("events")} */}
               </div>
             )}
 

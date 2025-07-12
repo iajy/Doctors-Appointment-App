@@ -74,6 +74,12 @@ function MyBigCalendar() {
         endAccessor="end"
         selectable
         onSelectSlot={(slotInfo) => {
+
+          const clickedDate = slotInfo.start;
+          if (clickedDate< new Date()){
+            toast.error("Past Date can't be Selected")
+            return;
+          }
           setAppointment(true);
           setDate(slotInfo.start);
           setInputAp(false);

@@ -53,7 +53,7 @@ function MyBigCalendar() {
       setEvents([...events, updatedEvent]);
     }
 
-    toast.success("Appointment Saved")
+    toast.success("Appointment Saved");
 
     setDoctor("");
     setPatient("");
@@ -63,153 +63,183 @@ function MyBigCalendar() {
     setEditingEventIndex(null);
   };
 
+  const handleDelete = () => {
+    const updatedEvent = {};
+
+    if (editingEventIndex !== null) {
+      const updatedEvents = [...events];
+      updatedEvents[editingEventIndex] = updatedEvent;
+      setEvents(updatedEvents);
+    } else {
+      setEvents([...events, updatedEvent]);
+    }
+    setAppointment(false);
+
+    toast.success("Appointment Deleted");
+  };
+
   return (
     <>
-    <div className="">
-      <Calendar
-        className="p-2 m-4 my-5"
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        selectable
-        onSelectSlot={(slotInfo) => {
+      <div className="">
+        <Calendar
+          className="p-2 m-4 my-5"
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          selectable
+          onSelectSlot={(slotInfo) => {
+            const clickedDate = slotInfo.start;
+            if (clickedDate < new Date()) {
+              toast.error("Past Date can't be Selected");
+              return;
+            }
+            setAppointment(true);
+            setDate(slotInfo.start);
+            setInputAp(false);
+            setEditingEventIndex(null); // Add mode
+          }}
+          onSelectEvent={(event) => {
+            const index = events.findIndex(
+              (e) =>
+                e.start.getTime() === new Date(event.start).getTime() &&
+                e.end.getTime() === new Date(event.end).getTime() &&
+                e.title === event.title
+            );
 
-          const clickedDate = slotInfo.start;
-          if (clickedDate< new Date()){
-            toast.error("Past Date can't be Selected")
-            return;
-          }
-          setAppointment(true);
-          setDate(slotInfo.start);
-          setInputAp(false);
-          setEditingEventIndex(null); // Add mode
-        }}
-        onSelectEvent={(event) => {
-          const index = events.findIndex(
-            (e) =>
-              e.start.getTime() === new Date(event.start).getTime() &&
-              e.end.getTime() === new Date(event.end).getTime() &&
-              e.title === event.title
-          );
+            setEditingEventIndex(index);
+            setDate(new Date(event.start));
 
-          setEditingEventIndex(index);
-          setDate(new Date(event.start));
+            const titleParts = event.title.split(" in ");
+            setPatient(titleParts[0] || "");
+            setTime(
+              `${String(event.start.getHours()).padStart(2, "0")}:${String(
+                event.start.getMinutes()
+              ).padStart(2, "0")}`
+            );
+            setInputAp(true);
+            setAppointment(true);
+          }}
+          style={{ height: 500 }}
+          dayPropGetter={(date) => {
+            if (date < new Date()) {
+              return {
+                style: {
+                  backgroundColor: "#f0f0f0",
+                  color: "#999",
+                },
+              };
+            }
+            return {};
+          }}
+        />
 
-          const titleParts = event.title.split(" in ");
-          setPatient(titleParts[0] || "");
-          setTime(
-            `${String(event.start.getHours()).padStart(2, "0")}:${String(
-              event.start.getMinutes()
-            ).padStart(2, "0")}`
-          );
-          setInputAp(true);
-          setAppointment(true);
-        }}
-        style={{ height: 500 }}
-        dayPropGetter={(date) => {
-          if (date < new Date()) {
-            return {
-              style: {
-                backgroundColor: "#f0f0f0",
-                color: "#999",
-              },
-            };
-          }
-          return {};
-        }}
-      />
+        {appointment && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50">
+            <div className="bg-white p-8 rounded-2xl w-full max-w-md shadow-2xl m-3 space-y-4">
+              <h2 className="text-xl font-semibold mb-4">
+                {editingEventIndex !== null
+                  ? "Edit Appointment"
+                  : "New Appointment"}{" "}
+                for: {date?.toDateString()}
+              </h2>
 
-      {appointment && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50">
-          <div className="bg-white p-8 rounded-2xl w-full max-w-md shadow-2xl m-3 space-y-4">
-            <h2 className="text-xl font-semibold mb-4">
-              {editingEventIndex !== null ? "Edit Appointment" : "New Appointment"} for:{" "}
-              {date?.toDateString()}
-            </h2>
+              {inputAp && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block mb-1 font-medium">
+                      Doctor Name:
+                    </label>
+                    <select
+                      className="w-full border rounded p-2"
+                      value={doctor}
+                      onChange={(e) => setDoctor(e.target.value)}
+                    >
+                      <option value="">Select Doctor</option>
+                      <option>Dr. Rahul S</option>
+                      <option>Dr. Arunimma Suresh</option>
+                      <option>Dr. John James</option>
+                      <option>Dr. Abdul Ali</option>
+                      <option>Dr. Steena Biju</option>
+                    </select>
+                  </div>
 
-            {inputAp && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block mb-1 font-medium">Doctor Name:</label>
-                  <select
-                    className="w-full border rounded p-2"
-                    value={doctor}
-                    onChange={(e) => setDoctor(e.target.value)}
+                  <div>
+                    <label className="block mb-1 font-medium">
+                      Patient Name:
+                    </label>
+                    <select
+                      className="w-full border rounded p-2"
+                      value={patient}
+                      onChange={(e) => setPatient(e.target.value)}
+                    >
+                      <option value="">Select Patient</option>
+                      <option>Anu Paul</option>
+                      <option>A R Suresh</option>
+                      <option>Akash Sunil</option>
+                      <option>Anamika P</option>
+                      <option>Devika S</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block mb-1 font-medium">Time:</label>
+                    <select
+                      className="w-full border rounded p-2"
+                      value={time}
+                      onChange={(e) => setTime(e.target.value)}
+                    >
+                      <option value="">Select Time</option>
+                      <option value="09:00">09:00 AM</option>
+                      <option value="10:00">10:00 AM</option>
+                      <option value="11:00">11:00 AM</option>
+                      <option value="12:00">12:00 PM</option>
+                      <option value="13:00">01:00 PM</option>
+                    </select>
+                  </div>
+                  <button
+                    className="bg-green-500 text-white rounded px-4 py-2 hover:bg-green-600"
+                    onClick={handleSave}
                   >
-                    <option value="">Select Doctor</option>
-                    <option>Dr. Rahul S</option>
-                    <option>Dr. Arunimma Suresh</option>
-                    <option>Dr. John James</option>
-                    <option>Dr. Abdul Ali</option>
-                    <option>Dr. Steena Biju</option>
-                  </select>
+                    {editingEventIndex !== null ? "Update" : "Save"}
+                  </button>
+                  {editingEventIndex && (
+                    <button
+                      className="bg-red-500 text-white rounded mx-2 px-4 py-2 hover:bg-red-600"
+                      onClick={handleDelete}
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
-
-                <div>
-                  <label className="block mb-1 font-medium">Patient Name:</label>
-                  <select
-                    className="w-full border rounded p-2"
-                    value={patient}
-                    onChange={(e) => setPatient(e.target.value)}
-                  >
-                    <option value="">Select Patient</option>
-                    <option>Anu Paul</option>
-                    <option>A R Suresh</option>
-                    <option>Akash Sunil</option>
-                    <option>Anamika P</option>
-                    <option>Devika S</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block mb-1 font-medium">Time:</label>
-                  <select
-                    className="w-full border rounded p-2"
-                    value={time}
-                    onChange={(e) => setTime(e.target.value)}
-                  >
-                    <option value="">Select Time</option>
-                    <option value="09:00">09:00 AM</option>
-                    <option value="10:00">10:00 AM</option>
-                    <option value="11:00">11:00 AM</option>
-                    <option value="12:00">12:00 PM</option>
-                    <option value="13:00">01:00 PM</option>
-                  </select>
-                </div>
-                <button
-                  className="bg-green-500 text-white rounded px-4 py-2 hover:bg-green-600"
-                  onClick={handleSave}
-                >
-                  {editingEventIndex !== null ? "Update" : "Save"}
-                </button>
-              </div>
-            )}
-
-            <div className="flex justify-end gap-4 mt-6">
-              {!inputAp && (
-                <button
-                  className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700"
-                  onClick={() => setInputAp(true)}
-                >
-                  {editingEventIndex !== null ? "Edit Appointment" : "Add Appointment"}
-                </button>
               )}
 
-              <button
-                className="bg-gray-400 text-white rounded px-4 py-2 hover:bg-gray-500"
-                onClick={() => {
-                  setInputAp(false);
-                  setAppointment(false);
-                  setEditingEventIndex(null);
-                }}
-              >
-                Close
-              </button>
+              <div className="flex justify-end gap-4 mt-6">
+                {!inputAp && (
+                  <button
+                    className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700"
+                    onClick={() => setInputAp(true)}
+                  >
+                    {editingEventIndex !== null
+                      ? "Edit Appointment"
+                      : "Add Appointment"}
+                  </button>
+                )}
+
+                <button
+                  className="bg-gray-400 text-white rounded px-4 py-2 hover:bg-gray-500"
+                  onClick={() => {
+                    setInputAp(false);
+                    setAppointment(false);
+                    setEditingEventIndex(null);
+                  }}
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
     </>
   );

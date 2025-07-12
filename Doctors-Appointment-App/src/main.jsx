@@ -7,7 +7,7 @@ import AppBar from "./Components/AppBar.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <AppBar/>
+    {/* <AppBar/> */}
     <App />
     <Toaster />
   </StrictMode>

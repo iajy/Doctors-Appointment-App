@@ -1,4 +1,4 @@
-import { Calendar, momentLocalizer } from "react-big-calendar";
+import { Calendar, momentLocalizer, Views } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { useEffect, useState } from "react";
@@ -7,17 +7,8 @@ import toast from "react-hot-toast";
 const localizer = momentLocalizer(moment);
 
 function MyBigCalendar() {
-  const [defaultView, setDefaultView] = useState("month");
+  const [defaultView, setDefaultView] = useState();
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [appointment, setAppointment] = useState(false);
-  const [date, setDate] = useState(null);
-  const [inputAp, setInputAp] = useState(false);
-
-  const [doctor, setDoctor] = useState("");
-  const [patient, setPatient] = useState("");
-  const [time, setTime] = useState("");
-
-  const [editingEventIndex, setEditingEventIndex] = useState(null);
 
   const [events, setEvents] = useState([
     {
@@ -27,6 +18,18 @@ function MyBigCalendar() {
       end: new Date(2025, 6, 20, 10),
     },
   ]);
+
+  const [appointment, setAppointment] = useState(false);
+  const [date, setDate] = useState(null);
+  const [inputAp, setInputAp] = useState(false);
+
+  const [doctor, setDoctor] = useState("");
+  const [patient, setPatient] = useState("");
+  const [time, setTime] = useState("");
+  const [editingEventIndex, setEditingEventIndex] = useState(null);
+
+  const [filterDoctor, setFilterDoctor] = useState("");
+  const [filterPatient, setFilterPatient] = useState("");
 
   useEffect(() => {
     const handleResize = () => {
@@ -105,18 +108,27 @@ function MyBigCalendar() {
     setEditingEventIndex(null);
   };
 
+  const filteredEvents = events.filter((event) => {
+    const matchesDoctor = !filterDoctor || event.doctor === filterDoctor;
+    const patientName = event.title.split(" in ")[0].trim();
+    const matchesPatient = !filterPatient || patientName === filterPatient;
+    return matchesDoctor && matchesPatient;
+  });
+
   return (
     <div className="container mx-auto px-2 sm:px-4 md:px-8 lg:px-12">
       <Calendar
         className="my-5"
         localizer={localizer}
-        events={events}
+        events={filteredEvents}
         startAccessor="start"
         endAccessor="end"
         selectable
         view={defaultView}
+        onView={(view) => setDefaultView(view)}
         date={currentDate}
         onNavigate={setCurrentDate}
+        style={{ height: "70vh" }}
         onSelectSlot={(slotInfo) => {
           const clickedDate = slotInfo.start;
           if (clickedDate < new Date()) {
@@ -150,26 +162,6 @@ function MyBigCalendar() {
           setDoctor(event.doctor || "");
           setInputAp(true);
           setAppointment(true);
-        }}
-        style={{ height: "70vh" }}
-        dayPropGetter={(date) => {
-          if (date < new Date()) {
-            return {
-              style: {
-                backgroundColor: "#f0f0f0",
-                color: "#999",
-                borderRadius: "4px",
-              },
-            };
-          }
-
-          return {
-            style: {
-              color: "#fff",
-              borderRadius: "4px",
-              border: "1px solid #3B82F6",
-            },
-          };
         }}
       />
 
@@ -292,6 +284,40 @@ function MyBigCalendar() {
           </div>
         </div>
       )}
+
+      <div className="flex flex-wrap gap-4 mb-4">
+        <div>
+          <label className="block mb-1 font-medium">Filter by Doctor:</label>
+          <select
+            className="border border-blue-600 rounded p-2"
+            value={filterDoctor}
+            onChange={(e) => setFilterDoctor(e.target.value)}
+          >
+            <option value="">All Doctors</option>
+            <option>Dr. Rahul S</option>
+            <option>Dr. Arunimma Suresh</option>
+            <option>Dr. John James</option>
+            <option>Dr. Abdul Ali</option>
+            <option>Dr. Steena Biju</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block mb-1 font-medium">Filter by Patient:</label>
+          <select
+            className="border border-blue-600 rounded p-2"
+            value={filterPatient}
+            onChange={(e) => setFilterPatient(e.target.value)}
+          >
+            <option value="">All Patients</option>
+            <option>Anu Paul</option>
+            <option>A R Suresh</option>
+            <option>Akash Sunil</option>
+            <option>Anamika P</option>
+            <option>Devika S</option>
+          </select>
+        </div>
+      </div>
     </div>
   );
 }

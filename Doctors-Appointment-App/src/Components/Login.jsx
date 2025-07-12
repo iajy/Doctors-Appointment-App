@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import toast from "react-hot-toast";
 
 const Login = () => {
     const [login,setLogin] =useState(true);
@@ -7,7 +8,9 @@ const Login = () => {
 
     const handleLogin= ()=>{
         if(email=="staff@clinic.com" && password == "123456"){
-        setLogin(false)
+        localStorage.setItem("username",email);
+        toast.success("Login Successfull")
+        setLogin(false);
         }
     }
   return (
@@ -15,10 +18,6 @@ const Login = () => {
       {login && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50">
           <div
-            // initial={{ opacity: 0, scale: 0.95 }}
-            // animate={{ opacity: 1, scale: 1 }}
-            // exit={{ opacity: 0, scale: 0.95 }}
-            // transition={{ duration: 0.2 }}
             className="bg-white p-8 rounded-2xl w-full max-w-md shadow-2xl relative m-3"
           >
             <h2 className="text-2xl font-bold mb-6 text-center text-indigo-600">

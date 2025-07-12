@@ -1,7 +1,8 @@
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 const localizer = momentLocalizer(moment);
 
@@ -22,9 +23,11 @@ function MyBigCalendar() {
   const [patient, setPatient] = useState("");
   const [time, setTime] = useState("");
 
+  const [editingEventIndex, setEditingEventIndex] = useState(null);
+
   const handleSave = () => {
     if (!doctor || !patient || !time) {
-      alert("Please fill all fields");
+      toast.error("Please fill all fields");
       return;
     }
 
@@ -36,45 +39,65 @@ function MyBigCalendar() {
     const endDate = new Date(startDate);
     endDate.setHours(startDate.getHours() + 1);
 
-    const newEvent = {
+    const updatedEvent = {
       title: `${patient} in ${time}`,
       start: startDate,
       end: endDate,
     };
 
-    setEvents([...events, newEvent]);
+    if (editingEventIndex !== null) {
+      const updatedEvents = [...events];
+      updatedEvents[editingEventIndex] = updatedEvent;
+      setEvents(updatedEvents);
+    } else {
+      setEvents([...events, updatedEvent]);
+    }
+
+    toast.success("Appointment Saved")
 
     setDoctor("");
     setPatient("");
     setTime("");
     setInputAp(false);
     setAppointment(false);
+    setEditingEventIndex(null);
   };
-
-  useEffect(() => {
-    localStorage.setItem("events", JSON.stringify(events));
-  }, [events]);
-
-  useEffect(() => {
-    const storedEvents = localStorage.getItem("events");
-    if (storedEvents) {
-      setEvents(JSON.parse(storedEvents));
-    }
-  }, []);
 
   return (
     <>
       <Calendar
-        className="p-2 m-4"
+        className="p-2 m-4 my-5"
         localizer={localizer}
         events={events}
         startAccessor="start"
         endAccessor="end"
         selectable
         onSelectSlot={(slotInfo) => {
-          console.log("Clicked date:", slotInfo.start);
           setAppointment(true);
           setDate(slotInfo.start);
+          setInputAp(false);
+          setEditingEventIndex(null); // Add mode
+        }}
+        onSelectEvent={(event) => {
+          const index = events.findIndex(
+            (e) =>
+              e.start.getTime() === new Date(event.start).getTime() &&
+              e.end.getTime() === new Date(event.end).getTime() &&
+              e.title === event.title
+          );
+
+          setEditingEventIndex(index);
+          setDate(new Date(event.start));
+
+          const titleParts = event.title.split(" in ");
+          setPatient(titleParts[0] || "");
+          setTime(
+            `${String(event.start.getHours()).padStart(2, "0")}:${String(
+              event.start.getMinutes()
+            ).padStart(2, "0")}`
+          );
+          setInputAp(true);
+          setAppointment(true);
         }}
         style={{ height: 500 }}
         dayPropGetter={(date) => {
@@ -94,7 +117,8 @@ function MyBigCalendar() {
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50">
           <div className="bg-white p-8 rounded-2xl w-full max-w-md shadow-2xl m-3 space-y-4">
             <h2 className="text-xl font-semibold mb-4">
-              Appointment for: {date?.toDateString()}
+              {editingEventIndex !== null ? "Edit Appointment" : "New Appointment"} for:{" "}
+              {date?.toDateString()}
             </h2>
 
             {inputAp && (
@@ -116,9 +140,7 @@ function MyBigCalendar() {
                 </div>
 
                 <div>
-                  <label className="block mb-1 font-medium">
-                    Patient Name:
-                  </label>
+                  <label className="block mb-1 font-medium">Patient Name:</label>
                   <select
                     className="w-full border rounded p-2"
                     value={patient}
@@ -152,9 +174,8 @@ function MyBigCalendar() {
                   className="bg-green-500 text-white rounded px-4 py-2 hover:bg-green-600"
                   onClick={handleSave}
                 >
-                  Save
+                  {editingEventIndex !== null ? "Update" : "Save"}
                 </button>
-                {/* {localStorage.getItem("events")} */}
               </div>
             )}
 
@@ -164,7 +185,7 @@ function MyBigCalendar() {
                   className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700"
                   onClick={() => setInputAp(true)}
                 >
-                  Add Appointment
+                  {editingEventIndex !== null ? "Edit Appointment" : "Add Appointment"}
                 </button>
               )}
 
@@ -173,6 +194,7 @@ function MyBigCalendar() {
                 onClick={() => {
                   setInputAp(false);
                   setAppointment(false);
+                  setEditingEventIndex(null);
                 }}
               >
                 Close

@@ -128,7 +128,7 @@ function MyBigCalendar() {
         onView={(view) => setDefaultView(view)}
         date={currentDate}
         onNavigate={setCurrentDate}
-        style={{ height: "65vh" }}
+        style={{ height: "60vh" }}
         onSelectSlot={(slotInfo) => {
           const clickedDate = slotInfo.start;
           if (clickedDate < new Date()) {

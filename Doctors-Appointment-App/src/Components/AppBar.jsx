@@ -1,16 +1,15 @@
-// import Login from "./Login";
+import { useState } from "react";
+import Login from "./Login";
 
 const AppBar = () => {
-  const username = localStorage.getItem("username").split("@");
-//   const [login, setLogin] = useState(true);
+  const [login, setLogin] = useState(false);
 
   const handleLogin = () => {
-    // setLogin(!login);
+    setLogin(!login);
   };
   return (
     <>
-      {/* {!login && <Login />} */}
-
+      {login && <Login />}
       <div className="h-14 p-4 bg-blue-500 flex justify-between items-center">
         <div>
           <span className="text-2xl text-white font-bold px-1">Doctors</span>
@@ -19,10 +18,11 @@ const AppBar = () => {
           </span>
         </div>
         <button
-          className="bg-blue-600 p-2 rounded-2xl text-2xl font-medium text-white hover:bg-blue-700"
+          className="w-10 h-10 bg-blue-600 rounded-full text-2xl font-medium text-white hover:bg-blue-700"
           onClick={handleLogin}
         >
-          {username[0]}
+          {localStorage.getItem("username")?.charAt(0).toUpperCase() ||
+                    "U"}
         </button>
       </div>
     </>

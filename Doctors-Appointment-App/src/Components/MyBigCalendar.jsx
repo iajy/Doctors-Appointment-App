@@ -65,6 +65,7 @@ function MyBigCalendar() {
 
   return (
     <>
+    <div className="">
       <Calendar
         className="p-2 m-4 my-5"
         localizer={localizer}
@@ -203,6 +204,7 @@ function MyBigCalendar() {
           </div>
         </div>
       )}
+      </div>
     </>
   );
 }

@@ -33,6 +33,8 @@ function MyBigCalendar() {
     },
   ]);
 
+  const [currentDate, setCurrentDate] = useState(new Date());
+
   const [appointment, setAppointment] = useState(false);
   const [date, setDate] = useState(null);
   const [inputAp, setInputAp] = useState(false);
@@ -82,15 +84,16 @@ function MyBigCalendar() {
   };
 
   const handleDelete = () => {
-  if (editingEventIndex !== null) {
-    const updatedEvents = events.filter((_, idx) => idx !== editingEventIndex);
-    setEvents(updatedEvents);
-    toast.success("Appointment Deleted");
-  }
-  setAppointment(false);
-  setEditingEventIndex(null);
-};
-
+    if (editingEventIndex !== null) {
+      const updatedEvents = events.filter(
+        (_, idx) => idx !== editingEventIndex
+      );
+      setEvents(updatedEvents);
+      toast.success("Appointment Deleted");
+    }
+    setAppointment(false);
+    setEditingEventIndex(null);
+  };
 
   return (
     <>
@@ -102,7 +105,9 @@ function MyBigCalendar() {
           startAccessor="start"
           endAccessor="end"
           selectable
-          defaultView={defaultView}
+          view={defaultView}
+          date={currentDate}
+          onNavigate={setCurrentDate}
           onSelectSlot={(slotInfo) => {
             const clickedDate = slotInfo.start;
             if (clickedDate < new Date()) {
@@ -142,12 +147,34 @@ function MyBigCalendar() {
                 style: {
                   backgroundColor: "#f0f0f0",
                   color: "#999",
+                  borderRadius: "4px",
+                  border: "1px solid #3B82F6",
                 },
               };
             }
-            return {};
+
+            return {
+              style: {
+                color: "#fff",
+                borderRadius: "4px",
+                border: "1px solid #3B82F6",
+              },
+            };
           }}
         />
+        {window.innerWidth < 768 && (
+          <div className="my-4 flex justify-end">
+            <input
+              type="date"
+              value={moment(currentDate).format("YYYY-MM-DD")}
+              onChange={(e) => {
+                const selectedDate = moment(e.target.value).toDate();
+                setCurrentDate(selectedDate);
+              }}
+              className="border border-blue-500 p-2 rounded"
+            />
+          </div>
+        )}
 
         {appointment && (
           <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50 p-4">
@@ -214,7 +241,7 @@ function MyBigCalendar() {
                   </div>
 
                   <button
-                    className="bg-green-500 text-white rounded px-4 py-2 hover:bg-green-600 w-full"
+                    className="bg-green-500 text-white rounded px-4 py-2 hover:bg-green-600 "
                     onClick={handleSave}
                   >
                     {editingEventIndex !== null ? "Update" : "Save"}
@@ -222,7 +249,7 @@ function MyBigCalendar() {
 
                   {editingEventIndex !== null && (
                     <button
-                      className="bg-red-500 text-white rounded px-4 py-2 hover:bg-red-600 w-full"
+                      className="bg-red-500 text-white rounded px-4 py-2 mx-2 hover:bg-red-600 "
                       onClick={handleDelete}
                     >
                       Delete

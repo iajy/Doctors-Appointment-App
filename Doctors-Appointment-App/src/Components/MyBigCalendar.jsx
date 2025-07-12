@@ -1,12 +1,30 @@
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 const localizer = momentLocalizer(moment);
 
 function MyBigCalendar() {
+  const [defaultView, setDefaultView] = useState("month");
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setDefaultView("day");
+      } else {
+        setDefaultView("month");
+      }
+    };
+
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const [events, setEvents] = useState([
     {
       title: "Arun K in 9:00AM",
@@ -64,30 +82,27 @@ function MyBigCalendar() {
   };
 
   const handleDelete = () => {
-    const updatedEvent = {};
-
-    if (editingEventIndex !== null) {
-      const updatedEvents = [...events];
-      updatedEvents[editingEventIndex] = updatedEvent;
-      setEvents(updatedEvents);
-    } else {
-      setEvents([...events, updatedEvent]);
-    }
-    setAppointment(false);
-
+  if (editingEventIndex !== null) {
+    const updatedEvents = events.filter((_, idx) => idx !== editingEventIndex);
+    setEvents(updatedEvents);
     toast.success("Appointment Deleted");
-  };
+  }
+  setAppointment(false);
+  setEditingEventIndex(null);
+};
+
 
   return (
     <>
-      <div className="">
+      <div className="container mx-auto px-2 sm:px-4 md:px-8 lg:px-12">
         <Calendar
-          className="p-2 m-4 my-5"
+          className="my-5"
           localizer={localizer}
           events={events}
           startAccessor="start"
           endAccessor="end"
           selectable
+          defaultView={defaultView}
           onSelectSlot={(slotInfo) => {
             const clickedDate = slotInfo.start;
             if (clickedDate < new Date()) {
@@ -97,7 +112,7 @@ function MyBigCalendar() {
             setAppointment(true);
             setDate(slotInfo.start);
             setInputAp(false);
-            setEditingEventIndex(null); // Add mode
+            setEditingEventIndex(null);
           }}
           onSelectEvent={(event) => {
             const index = events.findIndex(
@@ -120,7 +135,7 @@ function MyBigCalendar() {
             setInputAp(true);
             setAppointment(true);
           }}
-          style={{ height: 500 }}
+          style={{ height: "70vh" }}
           dayPropGetter={(date) => {
             if (date < new Date()) {
               return {
@@ -135,8 +150,8 @@ function MyBigCalendar() {
         />
 
         {appointment && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50">
-            <div className="bg-white p-8 rounded-2xl w-full max-w-md shadow-2xl m-3 space-y-4">
+          <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50 p-4">
+            <div className="bg-white p-6 sm:p-8 md:p-10 rounded-2xl w-full max-w-md sm:max-w-lg shadow-2xl space-y-4 overflow-y-auto max-h-[90vh]">
               <h2 className="text-xl font-semibold mb-4">
                 {editingEventIndex !== null
                   ? "Edit Appointment"
@@ -197,15 +212,17 @@ function MyBigCalendar() {
                       <option value="13:00">01:00 PM</option>
                     </select>
                   </div>
+
                   <button
-                    className="bg-green-500 text-white rounded px-4 py-2 hover:bg-green-600"
+                    className="bg-green-500 text-white rounded px-4 py-2 hover:bg-green-600 w-full"
                     onClick={handleSave}
                   >
                     {editingEventIndex !== null ? "Update" : "Save"}
                   </button>
-                  {editingEventIndex && (
+
+                  {editingEventIndex !== null && (
                     <button
-                      className="bg-red-500 text-white rounded mx-2 px-4 py-2 hover:bg-red-600"
+                      className="bg-red-500 text-white rounded px-4 py-2 hover:bg-red-600 w-full"
                       onClick={handleDelete}
                     >
                       Delete

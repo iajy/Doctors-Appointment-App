@@ -3,14 +3,14 @@ import Login from "./Login";
 
 const AppBar = () => {
   const username = localStorage.getItem("username").split("@");
-  const [login, setLogin] = useState(true);
+//   const [login, setLogin] = useState(true);
 
   const handleLogin = () => {
-    setLogin(!login);
+    // setLogin(!login);
   };
   return (
     <>
-      {!login && <Login />}
+      {/* {!login && <Login />} */}
 
       <div className="h-14 p-4 bg-blue-500 flex justify-between items-center">
         <div>
